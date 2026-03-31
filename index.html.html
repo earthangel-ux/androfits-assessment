@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Androfits — New Client Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand:#4A4190; --brand-mid:#5B4E9E; --brand-light:#7B70BF;
+    --brand-pale:#EAE8F5; --brand-faint:#F5F4FB; --accent:#C4B8FF;
+    --fg:#1E1A2E; --fg2:#6B648A; --fg3:#9E98B8;
+    --surface:#FFFFFF; --surface2:#F7F6FB;
+    --border:rgba(74,65,144,0.12); --border2:rgba(74,65,144,0.22);
+    --radius:10px; --radiuslg:16px; --radiusxl:22px;
+  }
+  body { font-family:'DM Sans',sans-serif; font-size:14px; color:var(--fg); background:#EFECF8; min-height:100vh; padding:2rem 1rem 3rem; }
+  .container { max-width:900px; margin:0 auto; background:var(--surface); border-radius:var(--radiusxl); box-shadow:0 8px 48px rgba(74,65,144,0.14),0 2px 8px rgba(74,65,144,0.08); overflow:hidden; }
+
+  .header { background:var(--brand); padding:0; position:relative; overflow:hidden; }
+  .hbc { position:absolute; border-radius:50%; border:2px solid rgba(196,184,255,0.15); }
+  .hbc1 { width:320px; height:320px; right:-80px; top:-120px; }
+  .hbc2 { width:180px; height:180px; right:60px; top:20px; }
+  .hbc3 { width:80px; height:80px; right:160px; bottom:10px; background:rgba(196,184,255,0.06); border:none; }
+  .header-inner { padding:2.5rem 2.5rem 2rem; position:relative; z-index:1; }
+  .logo-text { font-family:'DM Serif Display',serif; font-size:30px; color:#fff; letter-spacing:1px; }
+  .motto-pill { display:inline-flex; align-items:center; gap:6px; background:rgba(196,184,255,0.18); border:1px solid rgba(196,184,255,0.3); border-radius:20px; padding:5px 14px; font-size:12px; color:var(--accent); letter-spacing:0.3px; margin-bottom:10px; }
+  .motto-pill::before { content:'✦'; font-size:10px; }
+  .header-title { font-family:'DM Serif Display',serif; font-size:36px; font-weight:400; color:#fff; line-height:1.15; margin-bottom:6px; }
+  .header-title em { font-style:italic; color:var(--accent); }
+  .header-sub { font-size:13px; color:rgba(255,255,255,0.55); font-weight:300; }
+  .header-tags { display:flex; gap:8px; margin-top:1.25rem; flex-wrap:wrap; }
+  .h-tag { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.75); letter-spacing:0.3px; border:1px solid rgba(255,255,255,0.12); }
+
+  .progress-area { background:var(--brand-faint); border-bottom:1px solid var(--border); padding:16px 24px; }
+  .progress-steps { display:flex; align-items:center; gap:6px; }
+  .step-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:500; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+  .step-dot.done { background:var(--brand); color:#fff; }
+  .step-dot.active { background:var(--brand-light); color:#fff; box-shadow:0 0 0 3px rgba(91,78,158,0.25); }
+  .step-dot.future { background:transparent; border:1.5px solid var(--border2); color:var(--fg3); }
+  .step-connector { flex:1; height:1.5px; background:var(--border); min-width:6px; }
+  .step-connector.done { background:var(--brand-light); }
+  .step-info { margin-top:8px; font-size:12px; color:var(--fg2); }
+  .step-info strong { color:var(--brand); font-weight:500; }
+
+  .section { padding:1.75rem 2.5rem; border-bottom:1px solid var(--border); }
+  .section:last-child { border-bottom:none; }
+  .section-head { display:flex; align-items:flex-start; gap:12px; margin-bottom:1.5rem; }
+  .section-num { width:28px; height:28px; border-radius:8px; background:var(--brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; font-weight:500; color:#fff; margin-top:2px; }
+  .section-title { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; color:var(--brand); line-height:1.2; }
+  .section-subtitle { font-size:12px; color:var(--fg2); margin-top:3px; line-height:1.5; }
+
+  .welcome-banner { background:linear-gradient(135deg,var(--brand-pale) 0%,#F0EEFF 100%); border:1px solid var(--border); border-radius:var(--radiuslg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; gap:16px; align-items:flex-start; }
+  .wb-icon { font-size:28px; flex-shrink:0; margin-top:2px; }
+  .wb-title { font-family:'DM Serif Display',serif; font-size:17px; color:var(--brand); margin-bottom:4px; }
+  .wb-text { font-size:13px; color:var(--fg2); line-height:1.6; }
+
+  .form-grid { display:grid; gap:16px; }
+  .form-grid.g2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .form-grid.g3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  @media(max-width:620px){.form-grid.g2,.form-grid.g3{grid-template-columns:1fr}.section{padding:1.25rem}.header-inner{padding:1.75rem 1.25rem 1.5rem}}
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field>label { font-size:11px; font-weight:500; color:var(--fg2); text-transform:uppercase; letter-spacing:0.6px; }
+  .field>label .req { color:#B05; margin-left:2px; }
+  .field>label .hint { font-weight:300; text-transform:none; letter-spacing:0; color:var(--fg3); font-size:11px; }
+  .field input,.field select,.field textarea { background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--radius); padding:9px 12px; font-size:14px; color:var(--fg); font-family:'DM Sans',sans-serif; transition:border 0.15s; }
+  .field input:focus,.field select:focus,.field textarea:focus { outline:none; border-color:var(--brand-light); background:var(--surface); box-shadow:0 0 0 3px rgba(91,78,158,0.12); }
+  .field textarea { resize:vertical; min-height:80px; line-height:1.6; }
+  .field input[readonly] { background:var(--brand-faint); color:var(--brand); font-weight:500; cursor:default; }
+  .mt { margin-top:16px; }
+
+  .pill-group { display:flex; flex-wrap:wrap; gap:7px; }
+  .pill { padding:6px 14px; border-radius:20px; border:1.5px solid var(--border2); font-size:13px; color:var(--fg2); cursor:pointer; transition:all 0.15s; user-select:none; background:var(--surface); font-family:'DM Sans',sans-serif; }
+  .pill:hover { border-color:var(--brand-light); color:var(--brand); background:var(--brand-faint); }
+  .pill.on { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .pill.sm { font-size:12px; padding:5px 11px; }
+
+  .scale-wrap { display:flex; gap:5px; flex-wrap:wrap; }
+  .scale-btn { width:36px; height:36px; border-radius:8px; border:1.5px solid var(--border2); background:var(--surface2); font-size:13px; color:var(--fg2); cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; font-family:'DM Sans',sans-serif; }
+  .scale-btn:hover { border-color:var(--brand-light); color:var(--brand); background:var(--brand-faint); }
+  .scale-btn.on { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .scale-ends { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .scale-end { font-size:11px; color:var(--fg3); }
+
+  .vital-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:1.5rem; }
+  @media(max-width:620px){.vital-grid{grid-template-columns:repeat(2,1fr)}}
+  .vital-card { background:var(--brand-faint); border:1px solid var(--border); border-radius:var(--radiuslg); padding:14px; position:relative; overflow:hidden; }
+  .vital-card::before { content:''; position:absolute; right:-12px; bottom:-12px; width:50px; height:50px; border-radius:50%; background:rgba(74,65,144,0.07); }
+  .vc-label { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.6px; color:var(--fg3); margin-bottom:6px; }
+  .vital-card input { font-family:'DM Serif Display',serif; font-size:22px; border:none; background:transparent; width:100%; color:var(--brand); padding:0; }
+  .vital-card input:focus { outline:none; }
+  .vc-unit { font-size:11px; color:var(--fg3); margin-top:2px; }
+
+  .fms-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .fms-table th { text-align:left; padding:8px 10px; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.6px; color:var(--fg3); border-bottom:1px solid var(--border); }
+  .fms-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .fms-table tr:last-child td { border-bottom:none; }
+  .fms-table tr:hover td { background:var(--brand-faint); }
+  .score-btns { display:flex; gap:4px; }
+  .sb { padding:4px 10px; border-radius:6px; border:1px solid var(--border2); background:var(--surface2); font-size:12px; cursor:pointer; color:var(--fg2); transition:all 0.12s; font-family:'DM Sans',sans-serif; }
+  .sb.s0 { background:#FDEAEA; color:#9B1C1C; border-color:transparent; }
+  .sb.s1 { background:#FEF3CD; color:#78440A; border-color:transparent; }
+  .sb.s2 { background:#E8F5E3; color:#276218; border-color:transparent; }
+  .sb.s3 { background:var(--brand); color:#fff; border-color:transparent; }
+  .fms-score-row { margin-top:16px; padding:14px 18px; background:var(--brand-faint); border-radius:var(--radiuslg); border:1px solid var(--border); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .fms-score-num { font-family:'DM Serif Display',serif; font-size:36px; color:var(--brand); line-height:1; }
+  .fms-score-den { font-size:16px; color:var(--fg3); }
+  .fms-score-label { font-size:12px; color:var(--fg2); max-width:300px; line-height:1.5; }
+
+  .note { background:var(--brand-faint); border-left:3px solid var(--brand-light); border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; font-size:12px; color:var(--fg2); line-height:1.65; margin-top:10px; }
+  .note strong { color:var(--brand); font-weight:500; }
+
+  .s-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radiuslg); overflow:hidden; margin-bottom:14px; }
+  .s-card-head { background:var(--brand-faint); padding:10px 16px; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.6px; color:var(--brand); border-bottom:1px solid var(--border); }
+  .s-row { display:flex; justify-content:space-between; align-items:baseline; padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; flex-wrap:wrap; gap:6px; }
+  .s-row:last-child { border-bottom:none; }
+  .sk { color:var(--fg2); }
+  .sv { font-weight:500; color:var(--fg); text-align:right; }
+  .badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:500; }
+  .b-low { background:#E8F5E3; color:#276218; }
+  .b-mod { background:#FEF3CD; color:#78440A; }
+  .b-high { background:#FDEAEA; color:#9B1C1C; }
+  .goal-tag { display:inline-block; padding:4px 11px; border-radius:20px; font-size:12px; background:var(--brand-pale); color:var(--brand); font-weight:500; margin:2px; border:1px solid var(--border); }
+
+  .nav-bar { display:flex; justify-content:space-between; align-items:center; padding:1.25rem 2.5rem; border-top:1px solid var(--border); background:var(--brand-faint); gap:12px; }
+  .nav-btn { padding:10px 24px; border-radius:var(--radius); font-size:13px; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; border:1.5px solid var(--border2); color:var(--fg2); background:var(--surface); }
+  .nav-btn:hover { border-color:var(--brand); color:var(--brand); }
+  .nav-btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); font-family:'DM Serif Display',serif; font-size:15px; padding:10px 28px; }
+  .nav-btn.primary:hover { background:var(--brand-mid); }
+  .nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
+
+  /* FINALIZE BUTTONS */
+  .finalize-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:2rem; padding-bottom:0.5rem; }
+  .fin-btn { display:flex; align-items:center; gap:8px; padding:13px 28px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.15s; border:1.5px solid var(--border2); }
+  .fin-btn.pdf { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .fin-btn.pdf:hover { background:var(--brand-mid); }
+  .fin-btn.email { background:var(--surface); color:var(--brand); border-color:var(--brand); }
+  .fin-btn.email:hover { background:var(--brand-faint); }
+  .fin-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .fin-btn svg { width:16px; height:16px; flex-shrink:0; }
+
+  /* STATUS TOAST */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(20px); background:var(--brand); color:#fff; padding:12px 24px; border-radius:var(--radiuslg); font-size:13px; font-weight:500; opacity:0; transition:all 0.3s; z-index:999; white-space:nowrap; pointer-events:none; box-shadow:0 4px 20px rgba(74,65,144,0.35); }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  #toast.error { background:#9B1C1C; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="container">
+  <div class="header">
+    <div class="hbc hbc1"></div><div class="hbc hbc2"></div><div class="hbc hbc3"></div>
+    <div class="header-inner">
+      <div style="margin-bottom:1.5rem"><span class="logo-text">Androfits</span></div>
+      <div class="motto-pill">All bodies are athletic bodies</div>
+      <div class="header-title">New Client <em>Assessment</em></div>
+      <div class="header-sub">A welcoming first step — no experience needed, just show up as you are</div>
+      <div class="header-tags">
+        <span class="h-tag">Strength Foundation</span>
+        <span class="h-tag">Mobility</span>
+        <span class="h-tag">Confidence Building</span>
+        <span class="h-tag">Clinical Approach</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-area">
+    <div class="progress-steps" id="progress-bar"></div>
+    <div class="step-info" id="step-label"></div>
+  </div>
+
+  <div id="pages-container"></div>
+
+  <div class="nav-bar">
+    <button class="nav-btn" id="btn-back" onclick="nav(-1)">← Back</button>
+    <div></div>
+    <button class="nav-btn primary" id="btn-next" onclick="nav(1)">Continue →</button>
+  </div>
+</div>
+
+<script>
+// ── EmailJS config ──────────────────────────────
+const EJS_PUBLIC_KEY  = 'KxK2P10gSBGpgjwJ0';
+const EJS_SERVICE_ID  = 'service_z7cttin';
+const EJS_TEMPLATE_ID = 'template_8id20gc';
+emailjs.init(EJS_PUBLIC_KEY);
+
+// ── App state ───────────────────────────────────
+const STEPS=[{id:'demographics',label:'About You'},{id:'health',label:'Health History'},{id:'pain',label:'Pain & Injury'},{id:'lifestyle',label:'Lifestyle'},{id:'movement',label:'Movement Screen'},{id:'performance',label:'Baseline'},{id:'goals',label:'Goals'},{id:'summary',label:'Summary'}];
+let cur=0; const data={};
+
+// ── Helpers ─────────────────────────────────────
+function save(k,v){data[k]=v;}
+function togglePill(key,val,el){if(!data[key])data[key]=[];if(el.classList.contains('on')){el.classList.remove('on');data[key]=data[key].filter(x=>x!==val);}else{el.classList.add('on');if(!data[key].includes(val))data[key].push(val);}}
+function toggleRadio(key,val,el,gc){document.querySelectorAll('.'+gc).forEach(p=>p.classList.remove('on'));el.classList.add('on');data[key]=val;}
+function selectScale(gid,key,val,btn){document.querySelectorAll('#'+gid+' .scale-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');data[key]=val;}
+function setFMS(i,s,btn){document.querySelectorAll('#fms-'+i+' .sb').forEach(b=>b.className='sb');btn.className='sb s'+s;data['fms_'+i]=s;updateFMS();}
+function updateFMS(){let t=0,h=false;for(let i=0;i<12;i++){if(data['fms_'+i]!==undefined){t+=data['fms_'+i];h=true;}}const el=document.getElementById('fms-total');if(el)el.textContent=h?t:'—';const bar=document.getElementById('fms-bar');if(bar&&h)bar.style.width=Math.round((t/21)*100)+'%';}
+function calcFMSTotal(){let t=0,h=false;for(let i=0;i<12;i++){if(data['fms_'+i]!==undefined){t+=data['fms_'+i];h=true;}}return h?t:null;}
+function calcAge(){const dv=document.getElementById('f_dob')?.value;if(!dv)return;const b=new Date(dv),td=new Date();let a=td.getFullYear()-b.getFullYear();if(td.getMonth()<b.getMonth()||(td.getMonth()===b.getMonth()&&td.getDate()<b.getDate()))a--;const ae=document.getElementById('f_age');if(ae)ae.value=a;data.age=a;}
+function sc(id,key,lo,hi,lLo,lHi){let h=`<div class="scale-ends"><span class="scale-end">${lLo}</span><span class="scale-end">${lHi}</span></div><div class="scale-wrap" id="${id}">`;for(let i=lo;i<=hi;i++)h+=`<div class="scale-btn" onclick="selectScale('${id}','${key}',${i},this)">${i}</div>`;return h+'</div>';}
+
+function toast(msg, isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show'+(isError?' error':'');
+  setTimeout(()=>t.className='',3500);
+}
+
+// ── Summary text builder (plain text for PDF + email) ──
+function buildSummaryText(){
+  const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'Not provided';
+  const conds=(data.cond||[]).filter(c=>c!=='None of the above');
+  const fms=calcFMSTotal();
+  let risk='Low';
+  if(conds.length>1||data.hasPain==='Frequent'||data.hasPain==='Daily / constant')risk='Moderate';
+  if(data.painScore>=7||data.phyClr==='No — need to get it'||(fms!==null&&fms<=14))risk='High';
+
+  return `
+ANDROFITS — NEW CLIENT ASSESSMENT
+Assessment Date: ${data.assessDate||new Date().toLocaleDateString()}
+Trainer: ${data.trainerName||'Not provided'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Name:              ${name}
+Age:               ${data.age||'—'}
+Sex:               ${data.sex||'—'}
+Pronouns:          ${data.pronouns||'—'}
+Occupation:        ${data.job||'—'}
+Phone:             ${data.phone||'—'}
+Email:             ${data.email||'—'}
+Emergency Contact: ${data.emerg||'—'}
+Training Exp:      ${data.trainYrs||'—'}
+Current Activity:  ${data.trainFreq||'—'}
+Sports / Hobbies:  ${data.sports||'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VITALS & BIOMETRICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Height:     ${data.height||'—'} in
+Weight:     ${data.weight||'—'} lbs
+Blood Pres: ${data.bp||'—'} mmHg
+Resting HR: ${data.rhr||'—'} bpm
+Body Fat:   ${data.bf||'—'}%
+Waist:      ${data.waist||'—'} in
+Hip:        ${data.hip||'—'} in
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLINICAL CONSIDERATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Medical Conditions: ${conds.length?conds.join(', '):'None reported'}
+Medications:        ${data.meds||'None reported'}
+Allergies:          ${data.allergies||'None reported'}
+Surgery History:    ${data.surgery||'None reported'}
+Family History:     ${data.famHist||'—'}
+Current Pain:       ${data.hasPain||'—'}
+Pain Intensity:     ${data.painScore!==undefined?data.painScore+'/10':'—'}
+Pain Regions:       ${(data.painR||[]).join(', ')||'—'}
+Pain Character:     ${(data.painC||[]).join(', ')||'—'}
+Pain Triggers:      ${(data.painT||[]).join(', ')||'—'}
+Prev. Injuries:     ${data.prevInj||'None reported'}
+Prev. Rehab:        ${data.prevRehab||'None reported'}
+Movements Avoided:  ${data.avoid||'None'}
+Phys. Clearance:    ${data.phyClr||'—'}
+Risk Class:         ${risk}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MOVEMENT SCREEN (FMS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Composite Score: ${fms!==null?fms+' / 21':'Not scored'}
+Postural Notes:  ${(data.post||[]).join(', ')||'None noted'}
+Trainer Obs:     ${data.postNotes||'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LIFESTYLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sleep:       ${data.sleep||'—'} · Quality: ${data.sleepQ||'—'}
+Stress:      ${data.stressScore!==undefined?data.stressScore+'/10':'—'}
+Energy:      ${data.energyScore!==undefined?data.energyScore+'/10':'—'}
+Daily Steps: ${data.steps||'—'}
+Job Type:    ${data.occAct||'—'}
+Diet:        ${data.diet||'—'}
+Water:       ${data.water||'—'}
+Supplements: ${data.supps||'None'}
+Alcohol:     ${data.alcohol||'—'}
+Tobacco:     ${data.tobacco||'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GOALS & READINESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Goals:        ${(data.goals||[]).join(', ')||'—'}
+Timeline:     ${data.timeline||'—'}
+Frequency:    ${data.sessFreq||'—'}
+Duration:     ${data.sessDur||'—'}
+Environment:  ${data.env||'—'}
+Targets:      ${data.perfTargets||'—'}
+Motivation:   ${(data.motiv||[]).join(', ')||'—'}
+Barriers:     ${(data.barriers||[]).join(', ')||'—'}
+Readiness:    ${data.readyScore!==undefined?data.readyScore+'/10':'—'}
+Confidence:   ${data.confScore!==undefined?data.confScore+'/10':'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TRAINER NOTES — PHASE 1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${data.trainerNotes||'(No notes entered)'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Client Signature: ${data.clientSig||'—'}
+Androfits — All bodies are athletic bodies
+`.trim();
+}
+
+// ── PDF EXPORT ──────────────────────────────────
+function downloadPDF(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const H=doc.internal.pageSize.getHeight();
+  const margin=18;
+  const colW=W-margin*2;
+  let y=0;
+
+  function addPage(){doc.addPage();y=margin;}
+
+  // Header band
+  doc.setFillColor(74,65,144);
+  doc.rect(0,0,W,32,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('ANDROFITS',margin,13);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.setTextColor(196,184,255);
+  doc.text('All bodies are athletic bodies',margin,20);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('New Client Assessment',margin,28);
+  y=42;
+
+  const lines=buildSummaryText().split('\n');
+  lines.forEach(line=>{
+    if(y>H-16)addPage();
+    const isHead=line.startsWith('━');
+    const isEmpty=line.trim()==='';
+    if(isHead){
+      doc.setFillColor(234,232,245);
+      doc.rect(margin-2,y-4,colW+4,7,'F');
+      doc.setTextColor(74,65,144);
+      doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.text(line.replace(/━/g,'').trim(),margin,y);
+      y+=6;
+    } else if(isEmpty){
+      y+=3;
+    } else {
+      doc.setTextColor(30,26,46);
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      const wrapped=doc.splitTextToSize(line,colW);
+      wrapped.forEach(wl=>{
+        if(y>H-16)addPage();
+        doc.text(wl,margin,y);
+        y+=5;
+      });
+    }
+  });
+
+  // Footer on every page
+  const total=doc.internal.getNumberOfPages();
+  for(let p=1;p<=total;p++){
+    doc.setPage(p);
+    doc.setFillColor(74,65,144);
+    doc.rect(0,H-8,W,8,'F');
+    doc.setTextColor(196,184,255);
+    doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.text('Androfits — Confidential Client Assessment',margin,H-3);
+    doc.text(`Page ${p} of ${total}`,W-margin,H-3,{align:'right'});
+  }
+
+  const name=[data.first||'client',data.last||''].filter(Boolean).join('_').replace(/\s/g,'_');
+  doc.save(`Androfits_Assessment_${name}_${new Date().toISOString().slice(0,10)}.pdf`);
+  toast('PDF downloaded successfully!');
+}
+
+// ── EMAIL SEND ──────────────────────────────────
+async function sendEmail(){
+  const clientEmail=data.email||'';
+  const trainerEmail=prompt('Enter trainer email address:','');
+  if(!trainerEmail){toast('Email cancelled.',true);return;}
+
+  const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'New Client';
+  const summaryText=buildSummaryText();
+  const btn=document.getElementById('btn-email');
+  if(btn){btn.disabled=true;btn.textContent='Sending...';}
+
+  const recipients=[{email:trainerEmail,label:'trainer'}];
+  if(clientEmail)recipients.push({email:clientEmail,label:'client'});
+
+  try{
+    for(const r of recipients){
+      await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+        to_email:    r.email,
+        client_name: name,
+        assessment_date: data.assessDate||new Date().toLocaleDateString(),
+        trainer_name: data.trainerName||'Androfits Trainer',
+        summary:     summaryText
+      });
+    }
+    toast(`Email sent to ${recipients.map(r=>r.label).join(' & ')} successfully!`);
+  } catch(err){
+    console.error(err);
+    toast('Email failed. Check your EmailJS template variables.',true);
+  } finally{
+    if(btn){btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Send Email';}
+  }
+}
+
+// ── Data arrays ─────────────────────────────────
+const CONDITIONS=['Cardiovascular disease','Hypertension','Diabetes (Type I)','Diabetes (Type II)','Metabolic syndrome','Osteoporosis / osteopenia','Arthritis','Herniated disc','Chronic back pain','Asthma','Thyroid disorder','Hormonal imbalance','Anxiety / depression','Neurological condition','Cancer (history)','None of the above'];
+const PAIN_R=['Neck','Shoulder (L)','Shoulder (R)','Upper back','Lower back','Hip (L)','Hip (R)','Knee (L)','Knee (R)','Ankle / foot','Elbow / wrist','None'];
+const PAIN_C=['Sharp','Dull ache','Burning','Radiating','Stiffness','Instability','Swelling'];
+const PAIN_T=['Sitting','Standing','Walking','Lifting','Overhead','Twisting','Stairs','Morning','After activity'];
+const POST=['Forward head','Rounded shoulders','Kyphosis','Lordosis','Anterior pelvic tilt','Posterior pelvic tilt','Knee valgus','Knee varus','Pronated feet'];
+const FMS=[['Deep Squat','Hip depth, heel contact, arm position, lumbar curve'],['Hurdle Step (L)','Hip hinge, pelvic tilt, knee tracking'],['Hurdle Step (R)','Hip hinge, pelvic tilt, knee tracking'],['Inline Lunge (L)','Thoracic rotation, knee valgus, balance'],['Inline Lunge (R)','Thoracic rotation, knee valgus, balance'],['Shoulder Mobility (L)','ROM, scapular winging, impingement'],['Shoulder Mobility (R)','ROM, scapular winging, impingement'],['Active SLR (L)','Hamstring length, pelvic stability'],['Active SLR (R)','Hamstring length, pelvic stability'],['Trunk Stability Push-Up','Core bracing, spinal neutral, hip sag'],['Rotary Stability (L)','Anti-rotation, hip-shoulder dissociation'],['Rotary Stability (R)','Anti-rotation, hip-shoulder dissociation']];
+const LIFTS=[['Bodyweight Squat','reps / form'],['Goblet Squat','lbs × reps'],['Back Squat','lbs 1RM est.'],['Deadlift','lbs 1RM est.'],['Bench / Chest Press','lbs 1RM est.'],['Overhead Press','lbs 1RM est.'],['Dumbbell Row','lbs/arm'],['Pull-Up / Lat Pulldown','reps or lbs'],['Plank Hold','seconds'],['Push-Up','reps'],['Glute Bridge','reps/notes'],['Single-Leg Balance','seconds each']];
+const COND_M=['Walking / hiking','Light jogging','Cycling','Swimming','Dancing','Group fitness','Yoga / Pilates','HIIT classes','Strength-focused only'];
+const GOALS=['Build strength from scratch','Increase mobility & flexibility','Lose body fat','Gain muscle','Improve posture','Reduce pain / recover from injury','Get confident in the gym','Athletic performance','Return to sport','Feel better in daily life','Manage a health condition','Train for a specific event'];
+const BARRIERS=['Time','Cost / budget','Fear of injury','Not knowing where to start','Past negative gym experiences','Self-consciousness','Work schedule','Family responsibilities','Low energy / motivation'];
+const MOTIV=['Feel stronger and more capable','Improve my health','Look and feel better','Manage a condition','Mental health & stress','Be a role model for family','Athletic goals','Just want to move more'];
+
+// ── Page HTML ────────────────────────────────────
+const PAGES={
+demographics:`<div class="section"><div class="welcome-banner"><div class="wb-icon">👋</div><div><div class="wb-title">Welcome to Androfits!</div><div class="wb-text">This form helps your trainer understand where you're starting from — there are no wrong answers and no judgment here. Take your time, and know that every question helps us support <em>you</em> better.</div></div></div><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Tell us about yourself</div><div class="section-subtitle">Basic info so we can get you set up</div></div></div><div class="form-grid g2"><div class="field"><label>First name <span class="req">*</span></label><input type="text" id="f_first" placeholder="Your first name" oninput="save('first',this.value)"></div><div class="field"><label>Last name <span class="req">*</span></label><input type="text" id="f_last" placeholder="Your last name" oninput="save('last',this.value)"></div><div class="field"><label>Date of birth <span class="req">*</span></label><input type="date" id="f_dob" oninput="save('dob',this.value);calcAge()"></div><div class="field"><label>Age <span class="hint">(auto-filled)</span></label><input type="text" id="f_age" placeholder="—" readonly></div><div class="field"><label>Biological sex</label><select onchange="save('sex',this.value)"><option value="">Select…</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></div><div class="field"><label>Pronouns <span class="hint">(optional)</span></label><input type="text" placeholder="e.g. she/her, he/him" oninput="save('pronouns',this.value)"></div><div class="field"><label>Phone <span class="req">*</span></label><input type="tel" placeholder="(555) 000-0000" oninput="save('phone',this.value)"></div><div class="field"><label>Email <span class="req">*</span></label><input type="email" placeholder="you@example.com" oninput="save('email',this.value)"></div><div class="field"><label>Occupation</label><input type="text" placeholder="Job title / industry" oninput="save('job',this.value)"></div><div class="field"><label>Emergency contact</label><input type="text" placeholder="Name & phone number" oninput="save('emerg',this.value)"></div></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Your movement history</div><div class="section-subtitle">Be honest — if you're brand new, that's perfect. We love beginners!</div></div></div><div class="form-grid g2"><div class="field"><label>Experience with strength / resistance training</label><select onchange="save('trainYrs',this.value)"><option value="">Select…</option><option>Complete beginner — never tried it</option><option>Tried it a little but inconsistent</option><option>Less than 1 year consistently</option><option>1–2 years</option><option>3–5 years</option><option>5+ years</option></select></div><div class="field"><label>How often are you currently active?</label><select onchange="save('trainFreq',this.value)"><option value="">Select…</option><option>Rarely / not at all</option><option>1–2 times/week</option><option>3–4 times/week</option><option>5+ times/week</option></select></div></div><div class="form-grid mt"><div class="field"><label>Sports or activities you enjoy?</label><input type="text" placeholder="e.g. yoga, hiking, dancing — anything counts!" oninput="save('sports',this.value)"></div><div class="field"><label>Anything else about your movement background?</label><textarea placeholder="Context about your history with exercise, sports, or physical activity…" oninput="save('athBg',this.value)"></textarea></div></div></div>`,
+
+health:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Health & medical history</div><div class="section-subtitle">Everything here is private and helps your trainer keep you safe</div></div></div><div class="field"><label>Any current or past medical conditions?</label><div class="pill-group mt" id="cond-group"></div></div><div class="form-grid g2 mt"><div class="field"><label>Current medications</label><textarea placeholder="Name and dosage if known…" oninput="save('meds',this.value)" style="min-height:70px"></textarea></div><div class="field"><label>Known allergies</label><textarea placeholder="Medications, substances, environmental…" oninput="save('allergies',this.value)" style="min-height:70px"></textarea></div><div class="field"><label>Recent surgeries or hospitalizations <span class="hint">(past 3 years)</span></label><textarea placeholder="Procedure, approximate date, current status…" oninput="save('surgery',this.value)" style="min-height:70px"></textarea></div><div class="field"><label>Family history of heart disease or diabetes?</label><div class="pill-group mt"><span class="pill sm fh-r" onclick="toggleRadio('famHist','Yes, heart disease',this,'fh-r')">Yes, heart disease</span><span class="pill sm fh-r" onclick="toggleRadio('famHist','Yes, diabetes',this,'fh-r')">Yes, diabetes</span><span class="pill sm fh-r" onclick="toggleRadio('famHist','Both',this,'fh-r')">Both</span><span class="pill sm fh-r" onclick="toggleRadio('famHist','None / unsure',this,'fh-r')">None / unsure</span></div></div></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Baseline measurements</div><div class="section-subtitle">Recorded by your trainer — these are starting points, not judgments</div></div></div><div class="vital-grid"><div class="vital-card"><div class="vc-label">Height</div><input type="number" placeholder="—" oninput="save('height',this.value)"><div class="vc-unit">inches</div></div><div class="vital-card"><div class="vc-label">Weight</div><input type="number" placeholder="—" oninput="save('weight',this.value)"><div class="vc-unit">lbs</div></div><div class="vital-card"><div class="vc-label">Resting HR</div><input type="number" placeholder="—" oninput="save('rhr',this.value)"><div class="vc-unit">bpm</div></div><div class="vital-card"><div class="vc-label">Blood Pressure</div><input type="text" placeholder="—" oninput="save('bp',this.value)"><div class="vc-unit">mmHg</div></div></div><div class="form-grid g3"><div class="field"><label>Body fat %</label><input type="number" placeholder="%" oninput="save('bf',this.value)"></div><div class="field"><label>Waist</label><input type="number" placeholder="inches" oninput="save('waist',this.value)"></div><div class="field"><label>Hip circumference</label><input type="number" placeholder="inches" oninput="save('hip',this.value)"></div></div><div class="note">Clients with BP above 140/90 mmHg, resting HR above 100 bpm, or unmanaged cardiac conditions will need physician clearance. This is standard care — not a barrier.</div></div>`,
+
+pain:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Pain & discomfort</div><div class="section-subtitle">This helps us build a program that works with your body, not against it</div></div></div><div class="field" style="margin-bottom:18px"><label>Do you experience any pain or discomfort?</label><div class="pill-group mt"><span class="pill pr-r" onclick="toggleRadio('hasPain','None — feeling good!',this,'pr-r')">None — feeling good!</span><span class="pill pr-r" onclick="toggleRadio('hasPain','Occasional',this,'pr-r')">Occasional</span><span class="pill pr-r" onclick="toggleRadio('hasPain','Frequent',this,'pr-r')">Frequent</span><span class="pill pr-r" onclick="toggleRadio('hasPain','Daily / constant',this,'pr-r')">Daily / constant</span></div></div><div class="form-grid g2"><div><div class="field" style="margin-bottom:14px"><label>Where do you feel it?</label><div class="pill-group mt" id="pr-group"></div></div><div class="field"><label>How would you describe it?</label><div class="pill-group mt" id="pc-group"></div></div></div><div><div class="field" style="margin-bottom:16px"><label>Pain intensity right now <span class="hint">(0=none, 10=severe)</span></label>${sc('ps-scale','painScore',0,10,'None','Severe')}</div><div class="field"><label>What tends to trigger it?</label><div class="pill-group mt" id="pt-group"></div></div></div></div><div class="form-grid g2 mt"><div class="field"><label>Past injuries</label><textarea placeholder="e.g. knee sprain 2021, lower back strain…" oninput="save('prevInj',this.value)"></textarea></div><div class="field"><label>Previous PT or rehab?</label><textarea placeholder="Provider, what was treated, outcome…" oninput="save('prevRehab',this.value)"></textarea></div><div class="field"><label>Movements you currently avoid?</label><textarea placeholder="Squatting, overhead, impact — no shame in modifications!" oninput="save('avoid',this.value)"></textarea></div><div class="field"><label>Physician clearance for exercise?</label><div class="pill-group mt"><span class="pill sm clr-r" onclick="toggleRadio('phyClr','Yes',this,'clr-r')">Yes</span><span class="pill sm clr-r" onclick="toggleRadio('phyClr','No — need to get it',this,'clr-r')">No — need to get it</span><span class="pill sm clr-r" onclick="toggleRadio('phyClr','N/A — no conditions',this,'clr-r')">N/A — no conditions</span></div></div></div></div>`,
+
+lifestyle:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Sleep & recovery</div><div class="section-subtitle">Recovery is where adaptation happens — this matters a lot!</div></div></div><div class="form-grid g2"><div class="field"><label>Average nightly sleep</label><select onchange="save('sleep',this.value)"><option value="">Select…</option><option>Less than 5 hours</option><option>5–6 hours</option><option>6–7 hours</option><option>7–8 hours</option><option>8–9 hours</option><option>9+ hours</option></select></div><div class="field"><label>Sleep quality</label><div class="pill-group mt"><span class="pill sm sq-r" onclick="toggleRadio('sleepQ','Poor',this,'sq-r')">Poor</span><span class="pill sm sq-r" onclick="toggleRadio('sleepQ','Fair',this,'sq-r')">Fair</span><span class="pill sm sq-r" onclick="toggleRadio('sleepQ','Good',this,'sq-r')">Good</span><span class="pill sm sq-r" onclick="toggleRadio('sleepQ','Excellent',this,'sq-r')">Excellent</span></div></div><div class="field"><label>Daily stress level</label>${sc('str-scale','stressScore',1,10,'Low','High')}</div><div class="field"><label>Daily energy level</label>${sc('eng-scale','energyScore',1,10,'Low','High')}</div><div class="field"><label>Daily steps (estimate)</label><select onchange="save('steps',this.value)"><option value="">Select…</option><option>Under 2,000</option><option>2,000–5,000</option><option>5,000–8,000</option><option>8,000–12,000</option><option>12,000+</option></select></div><div class="field"><label>How active is your job?</label><select onchange="save('occAct',this.value)"><option value="">Select…</option><option>Mostly seated / desk work</option><option>Mix of sitting and standing</option><option>On my feet most of the day</option><option>Physically demanding / manual labour</option></select></div></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Nutrition & hydration</div></div></div><div class="form-grid g2"><div class="field"><label>How often do you eat each day?</label><select onchange="save('meals',this.value)"><option value="">Select…</option><option>1–2 meals</option><option>3 regular meals</option><option>4–5 smaller meals</option><option>Irregular / grazing</option></select></div><div class="field"><label>Daily water intake</label><select onchange="save('water',this.value)"><option value="">Select…</option><option>Less than 32 oz (1L)</option><option>32–64 oz (1–2L)</option><option>64–96 oz (2–3L)</option><option>96+ oz (3L+)</option></select></div><div class="field"><label>Dietary approach</label><select onchange="save('diet',this.value)"><option value="">Select…</option><option>No restrictions</option><option>High protein focus</option><option>Vegetarian</option><option>Vegan</option><option>Low carb / keto</option><option>Intermittent fasting</option><option>Medically prescribed</option><option>Other</option></select></div><div class="field"><label>Supplements</label><input type="text" placeholder="e.g. protein powder, creatine, none…" oninput="save('supps',this.value)"></div><div class="field"><label>Alcohol</label><select onchange="save('alcohol',this.value)"><option value="">Select…</option><option>None</option><option>Social / occasional</option><option>1–3 drinks/week</option><option>4–7 drinks/week</option><option>8+ drinks/week</option></select></div><div class="field"><label>Tobacco / nicotine</label><select onchange="save('tobacco',this.value)"><option value="">Select…</option><option>None</option><option>Former smoker</option><option>Occasional</option><option>Daily</option></select></div></div></div>`,
+
+movement:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Movement screen</div><div class="section-subtitle">Trainer-administered — scores are a starting point, not a grade</div></div></div><div class="note" style="margin-bottom:16px"><strong>Scoring:</strong> 3 = full movement, no compensation · 2 = compensated · 1 = unable or pain · 0 = pain → flag for referral</div><table class="fms-table"><thead><tr><th style="width:28%">Pattern</th><th style="width:36%">Observations</th><th style="width:22%">Score</th><th>Pain</th></tr></thead><tbody id="fms-body"></tbody></table><div class="fms-score-row"><div><div style="font-size:10px;color:var(--fg3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Composite</div><span class="fms-score-num" id="fms-total">—</span><span class="fms-score-den"> / 21</span></div><div style="flex:1"><div style="height:6px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:6px"><div id="fms-bar" style="height:100%;width:0%;background:var(--brand-light);border-radius:4px;transition:width 0.3s"></div></div><div class="fms-score-label">Scores at or below 14 are associated with elevated injury risk — this helps us program smarter from day one.</div></div></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Posture & alignment</div></div></div><div class="form-grid g2"><div class="field"><label>Postural deviations observed</label><div class="pill-group mt" id="post-group"></div></div><div class="field"><label>Trainer notes</label><textarea placeholder="Gait, asymmetries, compensation patterns…" oninput="save('postNotes',this.value)"></textarea></div></div></div>`,
+
+performance:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">Strength baseline</div><div class="section-subtitle">Brand new? Many of these will just be form assessments — that's completely normal!</div></div></div><div class="note" style="margin-bottom:16px">Enter estimated 1RM, weight × reps, or form notes. Write <strong>N/T</strong> (not tested) or leave blank if not appropriate today.</div><div class="form-grid g3" id="lifts-grid"></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Cardiovascular & conditioning</div></div></div><div class="form-grid g2"><div class="field"><label>Cardio fitness self-rating</label>${sc('cv-scale','cardioScore',1,10,'Very low','Excellent')}</div><div class="field"><label>Conditioning activities you enjoy?</label><div class="pill-group mt" id="cond-mod-group"></div></div><div class="field"><label>VO₂ max <span class="hint">(if tested)</span></label><input type="number" placeholder="ml/kg/min" oninput="save('vo2',this.value)"></div><div class="field"><label>Timed run <span class="hint">(optional)</span></label><input type="text" placeholder="e.g. 10:30 mile" oninput="save('runTime',this.value)"></div></div></div>`,
+
+goals:`<div class="section"><div class="section-head"><div class="section-num">1</div><div><div class="section-title">What brings you here?</div><div class="section-subtitle">No goal is too small, too big, or too basic</div></div></div><div class="field" style="margin-bottom:18px"><label>What do you most want from training?</label><div class="pill-group mt" id="goals-group"></div></div><div class="form-grid g2"><div class="field"><label>How long do you want to work toward this?</label><select onchange="save('timeline',this.value)"><option value="">Select…</option><option>Just getting started — no pressure</option><option>4–6 weeks (short kickstart)</option><option>3 months</option><option>6 months</option><option>1 year</option><option>Long-term lifestyle change</option></select></div><div class="field"><label>How often can you realistically train?</label><select onchange="save('sessFreq',this.value)"><option value="">Select…</option><option>1x per week</option><option>2x per week</option><option>3x per week</option><option>4x per week</option><option>5x per week</option></select></div><div class="field"><label>Session duration</label><select onchange="save('sessDur',this.value)"><option value="">Select…</option><option>30 minutes</option><option>45 minutes</option><option>60 minutes</option><option>75 minutes</option><option>90 minutes</option></select></div><div class="field"><label>Training environment</label><div class="pill-group mt"><span class="pill sm env-r" onclick="toggleRadio('env','In-studio',this,'env-r')">In-studio</span><span class="pill sm env-r" onclick="toggleRadio('env','Remote / online',this,'env-r')">Remote</span><span class="pill sm env-r" onclick="toggleRadio('env','Hybrid',this,'env-r')">Hybrid</span></div></div></div><div class="form-grid mt"><div class="field"><label>Specific milestones you're working toward?</label><textarea placeholder="e.g. "feel strong enough to carry my groceries", "do my first pull-up", "hike with my kids"…" oninput="save('perfTargets',this.value)"></textarea></div></div></div><div class="section"><div class="section-head"><div class="section-num">2</div><div><div class="section-title">Motivation & readiness</div></div></div><div class="form-grid g2"><div class="field"><label>What's motivating you most?</label><div class="pill-group mt" id="motiv-group"></div></div><div class="field"><label>What's gotten in the way before?</label><div class="pill-group mt" id="barriers-group"></div></div><div class="field"><label>Readiness to commit right now</label>${sc('rd-scale','readyScore',1,10,'Still warming up',"Let's go!")}</div><div class="field"><label>Confidence you can stick with it</label>${sc('cf-scale','confScore',1,10,'Not sure','Very confident')}</div></div><div class="form-grid mt"><div class="field"><label>Anything else your trainer should know?</label><textarea placeholder="Personal context, things that have helped or haven't — we're here to listen." oninput="save('extraNotes',this.value)"></textarea></div></div></div>`,
+
+summary:'__SUMMARY__'
+};
+
+function buildSummaryHTML(){
+  const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'—';
+  const conds=(data.cond||[]).filter(c=>c!=='None of the above');
+  const fms=calcFMSTotal();
+  let risk='Low',rc='b-low';
+  if(conds.length>1||data.hasPain==='Frequent'||data.hasPain==='Daily / constant'){risk='Moderate';rc='b-mod';}
+  if(data.painScore>=7||data.phyClr==='No — need to get it'||(fms!==null&&fms<=14)){risk='High';rc='b-high';}
+  return `<div class="section"><div class="section-head"><div class="section-num" style="font-size:16px">✓</div><div><div class="section-title">Assessment Summary</div><div class="section-subtitle">Trainer review — confirm before finalizing</div></div></div>
+  <div class="s-card"><div class="s-card-head">Client profile</div>
+    <div class="s-row"><span class="sk">Name</span><span class="sv">${name}</span></div>
+    <div class="s-row"><span class="sk">Age / Sex / Pronouns</span><span class="sv">${data.age||'—'} · ${data.sex||'—'} · ${data.pronouns||'—'}</span></div>
+    <div class="s-row"><span class="sk">Occupation</span><span class="sv">${data.job||'—'}</span></div>
+    <div class="s-row"><span class="sk">Training experience</span><span class="sv">${data.trainYrs||'—'}</span></div>
+    <div class="s-row"><span class="sk">Vitals</span><span class="sv">Wt: ${data.weight||'—'} lbs · BP: ${data.bp||'—'} · RHR: ${data.rhr||'—'} bpm</span></div>
+  </div>
+  <div class="s-card"><div class="s-card-head">Clinical considerations</div>
+    <div class="s-row"><span class="sk">Medical conditions</span><span class="sv">${conds.length?conds.join(', '):'None reported'}</span></div>
+    <div class="s-row"><span class="sk">Current pain</span><span class="sv">${data.hasPain||'—'} · Intensity: ${data.painScore!==undefined?data.painScore+'/10':'—'}</span></div>
+    <div class="s-row"><span class="sk">Physician clearance</span><span class="sv">${data.phyClr||'—'}</span></div>
+    <div class="s-row"><span class="sk">FMS composite</span><span class="sv">${fms!==null?fms+' / 21':'Not scored today'}</span></div>
+    <div class="s-row"><span class="sk">Risk classification</span><span class="sv"><span class="badge ${rc}">${risk} Risk</span></span></div>
+  </div>
+  <div class="s-card"><div class="s-card-head">Goals & program direction</div>
+    <div class="s-row"><span class="sk">Primary goals</span><span class="sv">${(data.goals||[]).length?(data.goals).map(g=>'<span class="goal-tag">'+g+'</span>').join(''):'—'}</span></div>
+    <div class="s-row"><span class="sk">Timeline</span><span class="sv">${data.timeline||'—'}</span></div>
+    <div class="s-row"><span class="sk">Sessions / Duration</span><span class="sv">${data.sessFreq||'—'} · ${data.sessDur||'—'}</span></div>
+    <div class="s-row"><span class="sk">Readiness</span><span class="sv">${data.readyScore!==undefined?data.readyScore+' / 10':'—'}</span></div>
+    <div class="s-row"><span class="sk">Confidence</span><span class="sv">${data.confScore!==undefined?data.confScore+' / 10':'—'}</span></div>
+  </div>
+  <div class="form-grid"><div class="field"><label>Trainer Phase 1 recommendations & notes</label><textarea placeholder="Program priorities, movements to avoid, referrals, key cues…" oninput="save('trainerNotes',this.value)" style="min-height:110px"></textarea></div></div>
+  <div class="form-grid g2 mt"><div class="field"><label>Client acknowledgment <span class="hint">(type full name)</span></label><input type="text" placeholder="Full legal name" oninput="save('clientSig',this.value)"></div><div class="field"><label>Assessment date</label><input type="date" oninput="save('assessDate',this.value)"></div></div>
+  <div class="form-grid mt"><div class="field"><label>Trainer name</label><input type="text" placeholder="Trainer / coach name" oninput="save('trainerName',this.value)"></div></div>
+  <div class="finalize-row">
+    <button class="fin-btn pdf" onclick="downloadPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      Download PDF
+    </button>
+    <button class="fin-btn email" id="btn-email" onclick="sendEmail()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      Send Email
+    </button>
+  </div>
+  </div>`;
+}
+
+function renderProgress(){
+  const bar=document.getElementById('progress-bar');
+  let h='';
+  STEPS.forEach((s,i)=>{
+    const c=i<cur?'done':i===cur?'active':'future';
+    h+=`<div class="step-dot ${c}" onclick="goTo(${i})" title="${s.label}">${i+1}</div>`;
+    if(i<STEPS.length-1)h+=`<div class="step-connector ${i<cur?'done':''}"></div>`;
+  });
+  bar.innerHTML=h;
+  document.getElementById('step-label').innerHTML=`<strong>${STEPS[cur].label}</strong> — Step ${cur+1} of ${STEPS.length}`;
+  document.getElementById('btn-back').disabled=cur===0;
+  document.getElementById('btn-next').textContent=cur===STEPS.length-1?'✓ Done':'Continue →';
+}
+
+function renderPage(){
+  const id=STEPS[cur].id;
+  document.getElementById('pages-container').innerHTML=id==='summary'?buildSummaryHTML():PAGES[id];
+  if(id==='health')document.getElementById('cond-group').innerHTML=CONDITIONS.map(c=>`<span class="pill sm" onclick="togglePill('cond','${c.replace(/'/g,"\\'")}',this)">${c}</span>`).join('');
+  if(id==='pain'){document.getElementById('pr-group').innerHTML=PAIN_R.map(r=>`<span class="pill sm" onclick="togglePill('painR','${r}',this)">${r}</span>`).join('');document.getElementById('pc-group').innerHTML=PAIN_C.map(c=>`<span class="pill sm" onclick="togglePill('painC','${c}',this)">${c}</span>`).join('');document.getElementById('pt-group').innerHTML=PAIN_T.map(t=>`<span class="pill sm" onclick="togglePill('painT','${t}',this)">${t}</span>`).join('');}
+  if(id==='movement'){document.getElementById('fms-body').innerHTML=FMS.map(([mv,obs],i)=>`<tr><td style="font-weight:500">${mv}</td><td><input type="text" placeholder="${obs}" style="width:100%;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--surface2);color:var(--fg);font-family:'DM Sans',sans-serif" oninput="save('fo${i}',this.value)"></td><td><div class="score-btns" id="fms-${i}"><button class="sb" onclick="setFMS(${i},0,this)">0</button><button class="sb" onclick="setFMS(${i},1,this)">1</button><button class="sb" onclick="setFMS(${i},2,this)">2</button><button class="sb" onclick="setFMS(${i},3,this)">3</button></div></td><td><span class="pill sm" style="border-radius:6px" onclick="togglePill('fmsF','${mv}',this)">Pain</span></td></tr>`).join('');document.getElementById('post-group').innerHTML=POST.map(p=>`<span class="pill sm" onclick="togglePill('post','${p}',this)">${p}</span>`).join('');}
+  if(id==='performance'){document.getElementById('lifts-grid').innerHTML=LIFTS.map(([mv,unit])=>`<div class="field"><label>${mv} <span class="hint">(${unit})</span></label><input type="text" placeholder="Result or N/T" oninput="save('p_${mv.replace(/[ \/]/g,'_')}',this.value)"></div>`).join('');document.getElementById('cond-mod-group').innerHTML=COND_M.map(m=>`<span class="pill sm" onclick="togglePill('condM','${m}',this)">${m}</span>`).join('');}
+  if(id==='goals'){document.getElementById('goals-group').innerHTML=GOALS.map(g=>`<span class="pill" onclick="togglePill('goals','${g.replace(/'/g,"\\'")}',this)">${g}</span>`).join('');document.getElementById('barriers-group').innerHTML=BARRIERS.map(b=>`<span class="pill sm" onclick="togglePill('barriers','${b}',this)">${b}</span>`).join('');document.getElementById('motiv-group').innerHTML=MOTIV.map(m=>`<span class="pill sm" onclick="togglePill('motiv','${m.replace(/'/g,"\\'")}',this)">${m}</span>`).join('');}
+}
+
+function goTo(i){cur=i;renderAll();window.scrollTo(0,0);}
+function nav(d){cur=Math.max(0,Math.min(STEPS.length-1,cur+d));renderAll();window.scrollTo(0,0);}
+function renderAll(){renderProgress();renderPage();}
+renderAll();
+</script>
+</body>
+</html>
