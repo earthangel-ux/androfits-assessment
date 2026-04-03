@@ -407,31 +407,15 @@ async function sendEmail(){
   const btn=document.getElementById('btn-send-confirm');
   if(btn){btn.disabled=true;btn.textContent='Sending...';}
 
+  const recipientInfo='>>> TRAINER: '+trainerEmail+(clientEmail&&clientEmail!==trainerEmail?'\n>>> CLIENT: '+clientEmail:'')+'\n\n';
   try{
     await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
       to_email:        'angel@androfits.com',
       client_name:     name,
       assessment_date: data.assessDate||new Date().toLocaleDateString(),
       trainer_name:    data.trainerName||'Androfits Trainer',
-      summary: '>>> TRAINER: '+trainerEmail+(clientEmail&&clientEmail!==trainerEmail?'
->>> CLIENT: '+clientEmail:'')+'
-
-'+summaryText
+      summary:         recipientInfo+summaryText
     });
-
-    if(clientEmail && clientEmail !== trainerEmail){
-      await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
-        to_email:        'angel@androfits.com',
-        client_name:     name,
-        assessment_date: data.assessDate||new Date().toLocaleDateString(),
-        trainer_name:    data.trainerName||'Androfits Trainer',
-        summary: '>>> TRAINER: '+trainerEmail+(clientEmail&&clientEmail!==trainerEmail?'
->>> CLIENT: '+clientEmail:'')+'
-
-'+summaryText
-      });
-    }
-
     toast('Email sent successfully! Check your inbox 📧');
     document.getElementById('email-box').style.display='none';
   } catch(err){
