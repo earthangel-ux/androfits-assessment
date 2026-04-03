@@ -385,43 +385,63 @@ function downloadPDF(){
 }
 
 // ── EMAIL SEND ──────────────────────────────────
-async function sendEmail(){
-  const clientEmail=data.email||'';
-  const trainerEmail=prompt('Enter trainer email address:','');
-  if(!trainerEmail){toast('Email cancelled.',true);return;}
-
-  const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'New Client';
-  const summaryText=buildSummaryText().substring(0,3000);
-  const btn=document.getElementById('btn-email');
-  if(btn){btn.disabled=true;btn.textContent='Sending...';}
-
-  const templateParams={
-    to_email:        trainerEmail,
-    client_name:     name,
-    assessment_date: data.assessDate||new Date().toLocaleDateString(),
-    trainer_name:    data.trainerName||'Androfits Trainer',
-    summary:         summaryText
-  };
-
-  try{
-    const res = await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, templateParams);
-    console.log('EmailJS response:', res);
-
-    // If client email exists, send to them too
-    if(clientEmail && clientEmail !== trainerEmail){
-      await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {...templateParams, to_email: clientEmail});
-    }
-
-    toast('Email sent successfully! Check your inbox 📧');
-  } catch(err){
-    console.error('EmailJS error:', err);
-    const reason = err.text || err.message || JSON.stringify(err);
-    toast('Email failed: ' + reason, true);
-  } finally{
-    if(btn){btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Send Email';}
+function showEmailBox(){
+  const box=document.getElementById('email-box');
+  if(box){
+    box.style.display=box.style.display==='none'?'block':'none';
+    const clientInput=document.getElementById('client-email-input');
+    if(clientInput && data.email) clientInput.value=data.email;
   }
 }
 
+async function sendEmail(){
+  const trainerInput=document.getElementById('trainer-email-input');
+  const clientInput=document.getElementById('client-email-input');
+  const trainerEmail=trainerInput?trainerInput.value.trim():'';
+  const clientEmail=clientInput?clientInput.value.trim():data.email||'';
+
+  if(!trainerEmail){toast('Please enter the trainer email address.',true);return;}
+
+  const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'New Client';
+  const summaryText=buildSummaryText().substring(0,5000);
+  const btn=document.getElementById('btn-send-confirm');
+  if(btn){btn.disabled=true;btn.textContent='Sending...';}
+
+  try{
+    await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+      to_email:        'angel@androfits.com',
+      client_name:     name,
+      assessment_date: data.assessDate||new Date().toLocaleDateString(),
+      trainer_name:    data.trainerName||'Androfits Trainer',
+      summary: '>>> TRAINER: '+trainerEmail+(clientEmail&&clientEmail!==trainerEmail?'
+>>> CLIENT: '+clientEmail:'')+'
+
+'+summaryText
+    });
+
+    if(clientEmail && clientEmail !== trainerEmail){
+      await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+        to_email:        'angel@androfits.com',
+        client_name:     name,
+        assessment_date: data.assessDate||new Date().toLocaleDateString(),
+        trainer_name:    data.trainerName||'Androfits Trainer',
+        summary: '>>> TRAINER: '+trainerEmail+(clientEmail&&clientEmail!==trainerEmail?'
+>>> CLIENT: '+clientEmail:'')+'
+
+'+summaryText
+      });
+    }
+
+    toast('Email sent successfully! Check your inbox 📧');
+    document.getElementById('email-box').style.display='none';
+  } catch(err){
+    console.error('EmailJS error:', err);
+    const reason=err.text||err.message||JSON.stringify(err);
+    toast('Email failed: '+reason, true);
+  } finally{
+    if(btn){btn.disabled=false;btn.textContent='Send Now';}
+  }
+}
 // ── Data arrays ─────────────────────────────────
 const CONDITIONS=['Cardiovascular disease','Hypertension','Diabetes (Type I)','Diabetes (Type II)','Metabolic syndrome','Osteoporosis / osteopenia','Arthritis','Herniated disc','Chronic back pain','Asthma','Thyroid disorder','Hormonal imbalance','Anxiety / depression','Neurological condition','Cancer (history)','None of the above'];
 const PAIN_R=['Neck','Shoulder (L)','Shoulder (R)','Upper back','Lower back','Hip (L)','Hip (R)','Knee (L)','Knee (R)','Ankle / foot','Elbow / wrist','None'];
