@@ -395,12 +395,10 @@ function showEmailBox(){
 }
 
 async function sendEmail(){
-  const trainerInput=document.getElementById('trainer-email-input');
-  const clientInput=document.getElementById('client-email-input');
-  const trainerEmail=trainerInput?trainerInput.value.trim():'';
-  const clientEmail=clientInput?clientInput.value.trim():data.email||'';
+  const trainerEmail=prompt('Enter trainer email address:','');
+  if(!trainerEmail){toast('Email cancelled.',true);return;}
+  const clientEmail=data.email||'';
 
-  if(!trainerEmail){toast('Please enter the trainer email address.',true);return;}
 
   const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'New Client';
   const summaryText=buildSummaryText().substring(0,5000);
