@@ -395,9 +395,12 @@ function showEmailBox(){
 }
 
 async function sendEmail(){
-  const trainerEmail=prompt('Enter trainer email address:','');
-  if(!trainerEmail){toast('Email cancelled.',true);return;}
-  const clientEmail=data.email||'';
+  const trainerInput=document.getElementById('trainer-email-input');
+  const clientInput=document.getElementById('client-email-input');
+  if(clientInput && !clientInput.value && data.email) clientInput.value=data.email;
+  const trainerEmail=trainerInput?trainerInput.value.trim():'';
+  const clientEmail=clientInput?clientInput.value.trim():data.email||'';
+  if(!trainerEmail){toast('Please enter the trainer email address.',true);return;}
 
 
   const name=[data.first||'',data.last||''].filter(Boolean).join(' ')||'New Client';
@@ -493,10 +496,19 @@ function buildSummaryHTML(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
       Download PDF
     </button>
-    <button class="fin-btn email" id="btn-email" onclick="sendEmail()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-      Send Email
-    </button>
+  </div>
+  <div style="margin-top:1.5rem;background:var(--brand-faint);border:1px solid var(--border);border-radius:var(--radiuslg);padding:1.25rem">
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.6px;color:var(--brand);margin-bottom:12px">Send assessment by email</div>
+    <div class="form-grid g2">
+      <div class="field"><label>Trainer email <span class="req">*</span></label><input type="email" id="trainer-email-input" placeholder="trainer@androfits.com" style="background:var(--surface)"></div>
+      <div class="field"><label>Client email <span class="hint">(auto-filled if entered in step 1)</span></label><input type="email" id="client-email-input" placeholder="client@email.com" style="background:var(--surface)"></div>
+    </div>
+    <div style="margin-top:12px">
+      <button class="fin-btn email" id="btn-email" onclick="sendEmail()" style="width:100%;justify-content:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+        Send Email to angel@androfits.com
+      </button>
+    </div>
   </div>
   </div>`;
 }
